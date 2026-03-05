@@ -294,37 +294,16 @@
             </div>
 
             <div id="cliente" class="tab-content">
-                <div id="senhaOverlay" class="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center hidden z-40">
-                    <div class="text-center">
-                        <div class="text-6xl font-bold text-yellow-400 mb-4">SENHA</div>
-                        <div id="overlaySenhaNumber" class="text-9xl font-bold text-white mb-6">---</div>
-                        <div id="overlaySenhaType" class="text-4xl font-bold text-green-400">NORMAL</div>
-                    </div>
+                <div id="senhaOverlay" class="fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center hidden z-40">
+                    <div id="overlaySenhaNumber" class="text-9xl font-bold text-yellow-400">---</div>
                 </div>
-                <div class="bg-gray-900 text-white rounded-lg overflow-hidden h-screen flex">
-                    <div class="flex-1">
-                        <div class="video-container">
-                            <iframe id="clientVideo" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </div>
+                <div id="clientVideoContainer" class="relative w-full h-screen bg-gray-900">
+                    <div class="video-container h-full">
+                        <iframe id="clientVideo" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
-                    <div class="w-64 bg-gray-800 p-4 flex flex-col">
-                        <div class="mb-6 text-center">
-                            <h2 class="text-xl font-bold mb-2">Bem-vindo(a)</h2>
-                            <p class="text-gray-400 text-sm">Aguarde sua senha</p>
-                        </div>
-                        <div class="bg-gray-700 p-4 rounded-lg flex-1 flex flex-col overflow-y-auto">
-                            <div class="text-center mb-4">
-                                <div class="text-gray-400 text-sm mb-1">Senha Atual</div>
-                                <div id="clientCurrentTicket" class="text-5xl font-bold text-yellow-400">---</div>
-                                <div id="clientCurrentTicketTime" class="text-gray-400 text-xs mt-1">--:--:--</div>
-                            </div>
-                            <div>
-                                <div class="text-gray-400 text-xs mb-2">Últimas Chamadas:</div>
-                                <div id="clientLastCalled" class="space-y-1 text-xs flex-1 overflow-y-auto"></div>
-                            </div>
-                        </div>
-                        <div class="mt-4 text-center text-gray-500 text-xs">
-                            <p>Mobile Vision 2025</p>
+                    <div id="senhasRodape" class="fixed bottom-0 left-0 right-0 bg-black bg-opacity-80 text-white p-4 flex gap-4 justify-center items-center h-20">
+                        <span class="text-sm text-gray-400">Últimas Senhas:</span>
+                        <div id="clientLastThree" class="flex gap-3">
                         </div>
                     </div>
                 </div>
@@ -378,7 +357,7 @@
     const clientVideo = document.getElementById('clientVideo');
     const clientCurrentTicket = document.getElementById('clientCurrentTicket');
     const clientCurrentTicketTime = document.getElementById('clientCurrentTicketTime');
-    const clientNextTickets = document.getElementById('clientNextTickets');
+    const clientLastThree = document.getElementById('clientLastThree');
 
     const currentTime = document.getElementById('currentTime');
 
@@ -389,7 +368,6 @@
 
     const senhaOverlay = document.getElementById('senhaOverlay');
     const overlaySenhaNumber = document.getElementById('overlaySenhaNumber');
-    const overlaySenhaType = document.getElementById('overlaySenhaType');
     const clientLastCalled = document.getElementById('clientLastCalled');
 
     let pendingTabId = null;
@@ -511,8 +489,6 @@
 
     function showSenhaOverlay(ticket) {
         overlaySenhaNumber.textContent = ticket.number;
-        overlaySenhaType.textContent = ticket.type === 'normal' ? 'NORMAL' : 'PREFERENCIAL';
-        overlaySenhaType.className = ticket.type === 'normal' ? 'text-4xl font-bold text-blue-400' : 'text-4xl font-bold text-green-400';
         senhaOverlay.classList.remove('hidden');
 
         // Zerar volume do vídeo
@@ -532,15 +508,20 @@
             const v = Number(videoVolume.value || 50) / 100;
             try { clientVideo.volume = v; } catch (e) {}
             try { videoPreview.volume = v; } catch (e) {}
+            // Atualizar barra de senhas
+            updateClientLastThree();
         }, 5000);
     }
 
     function callAgain() {
         if (!currentTicket) return;
-        updateCurrentTicketDisplay();
-        updateClientDisplay();
-        callAgainBtn.classList.add('animate-pulse');
-        setTimeout(() => callAgainBtn.classList.remove('animate-pulse'), 500);
+        // Reexibir a senha atual
+        showSenhaOverlay(currentTicket);
+        const button = callAgainBtn;
+        if (button) {
+            button.classList.add('animate-pulse');
+            setTimeout(() => button.classList.remove('animate-pulse'), 500);
+        }
     }
 
     // ---------- Atualizações de UI ----------
@@ -584,18 +565,22 @@
             clientCurrentTicketTime.textContent = '--:--:--';
         }
 
-        updateClientLastCalled();
+        updateClientLastThree();
+    }
+
+    function updateClientLastThree() {
+        clientLastThree.innerHTML = '';
+        const last = calledTickets.slice(-3).reverse();
+        last.forEach(t => {
+            const el = document.createElement('div');
+            el.className = t.type === 'normal' ? 'bg-blue-600 px-4 py-2 rounded text-center font-bold text-lg' : 'bg-green-600 px-4 py-2 rounded text-center font-bold text-lg';
+            el.textContent = t.number;
+            clientLastThree.appendChild(el);
+        });
     }
 
     function updateClientLastCalled() {
-        clientLastCalled.innerHTML = '';
-        const last = calledTickets.slice(-5).reverse();
-        last.forEach(t => {
-            const el = document.createElement('div');
-            el.className = t.type === 'normal' ? 'bg-blue-600 p-2 rounded text-center font-medium' : 'bg-green-600 p-2 rounded text-center font-medium';
-            el.textContent = t.number + ' (' + (t.type === 'normal' ? 'N' : 'P') + ')';
-            clientLastCalled.appendChild(el);
-        });
+        // Esta função não é mais usada, mas mantida para compatibilidade
     }
 
     function updateHistory() {
@@ -710,6 +695,7 @@
             localStorage.setItem('lastNormalNumber', String(lastNormalNumber));
             localStorage.setItem('lastPreferentialNumber', String(lastPreferentialNumber));
             localStorage.setItem('videoUrl', videoUrl || '');
+            localStorage.setItem('videoVolume', videoVolume.value || '50');
         } catch (e) {
             console.warn('Erro ao salvar localStorage:', e);
         }
@@ -757,6 +743,7 @@
             const savedLastNormal = localStorage.getItem('lastNormalNumber');
             const savedLastPreferential = localStorage.getItem('lastPreferentialNumber');
             const savedVideoUrl = localStorage.getItem('videoUrl');
+            const savedVideoVolume = localStorage.getItem('videoVolume');
 
             if (savedNormal) {
                 normalTickets = JSON.parse(savedNormal).map(t => ({ ...t, timestamp: t.timestamp ? new Date(t.timestamp) : null, calledTime: t.calledTime ? new Date(t.calledTime) : null }));
@@ -770,6 +757,12 @@
             if (savedLastNormal) lastNormalNumber = parseInt(savedLastNormal) || 0;
             if (savedLastPreferential) lastPreferentialNumber = parseInt(savedLastPreferential) || 0;
             if (savedVideoUrl) videoUrl = savedVideoUrl || videoUrl;
+            if (savedVideoVolume) {
+                if (videoVolume) videoVolume.value = savedVideoVolume;
+                const v = Number(savedVideoVolume || 50) / 100;
+                try { clientVideo.volume = v; } catch (e) {}
+                try { videoPreview.volume = v; } catch (e) {}
+            }
         } catch (e) {
             console.warn('Erro ao carregar localStorage:', e);
         }
@@ -820,6 +813,8 @@
         try { videoPreview.volume = v; } catch (e) {}
         // Atualizar volume do cliente
         try { clientVideo.volume = v; } catch (e) {}
+        // Salvar configuração
+        localStorage.setItem('videoVolume', videoVolume.value);
     });
 
     if (callNormalBtn) callNormalBtn.addEventListener('click', () => callNextTicket('normal'));
@@ -861,6 +856,13 @@
             document.body.classList.add('cliente-fullscreen');
         }
 
+        // Aplicar volume inicial
+        const savedVolume = localStorage.getItem('videoVolume') || '50';
+        if (videoVolume) videoVolume.value = savedVolume;
+        const v = Number(savedVolume) / 100;
+        try { clientVideo.volume = v; } catch (e) {}
+        try { videoPreview.volume = v; } catch (e) {}
+
         // Polling para atualizações em tempo real
         setInterval(() => {
             loadFromLocalStorage();
@@ -890,4 +892,3 @@
     </script>
 </body>
 </html>
-
