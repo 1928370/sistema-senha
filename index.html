@@ -30,6 +30,18 @@
             width: 100%;
             height: 100%;
         }
+        .cliente-fullscreen .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+        }
+        .cliente-fullscreen .video-container iframe {
+            width: 100vw;
+            height: 100vh;
+        }
         .senha-display {
             font-size: 3rem;
             font-weight: bold;
@@ -318,6 +330,16 @@
     let currentTicket = null;
     let lastNormalNumber = 0;
     let lastPreferentialNumber = 0;
+    let isLoggedIn = false;
+    let currentRole = '';
+
+    // Senhas
+    const passwords = {
+        admin: 'admin123',
+        atendente: 'atendente123',
+        emissor: 'senha123',
+        cliente: 'cliente123'
+    };
 
     // ---------- Elementos ----------
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -358,12 +380,34 @@
     }
 
     function showTab(tabId) {
+        if (!isLoggedIn || (currentRole !== tabId && currentRole !== 'admin')) {
+            const password = prompt(`Digite a senha para acessar ${tabId}:`);
+            if (!password || password !== passwords[tabId]) {
+                alert('Senha incorreta!');
+                return;
+            }
+            isLoggedIn = true;
+            currentRole = tabId;
+        }
+
         tabContents.forEach(c => c.classList.remove('active'));
         tabButtons.forEach(b => b.classList.remove('active'));
         const content = document.getElementById(tabId);
         if (content) content.classList.add('active');
         const btn = document.querySelector(`.tab-button[data-tab="${tabId}"]`);
         if (btn) btn.classList.add('active');
+
+        // Para cliente, esconder outras abas e fullscreen
+        if (tabId === 'cliente') {
+            tabButtons.forEach(b => {
+                if (b.getAttribute('data-tab') !== 'cliente') b.style.display = 'none';
+            });
+            document.body.classList.add('cliente-fullscreen');
+        } else {
+            tabButtons.forEach(b => b.style.display = 'block');
+            document.body.classList.remove('cliente-fullscreen');
+        }
+
         if (tabId === 'cliente') updateClientVideo();
     }
 
@@ -546,6 +590,9 @@
         }
         clientVideo.src = url;
         videoPreview.src = url;
+        // Aplicar volume atual
+        const v = Number(videoVolume.value || 50) / 100;
+        try { clientVideo.volume = v; } catch (e) {}
     }
 
     // ---------- Impressão ----------
@@ -625,11 +672,15 @@
         updateClientVideo();
         saveToLocalStorage();
         alert('Configuração salva!');
+        // Atualizar vídeo do cliente em tempo real
+        updateClientVideo();
     });
 
     if (videoVolume) videoVolume.addEventListener('input', () => {
         const v = Number(videoVolume.value || 50) / 100;
         try { videoPreview.volume = v; } catch (e) {}
+        // Atualizar volume do cliente
+        try { clientVideo.volume = v; } catch (e) {}
     });
 
     if (callNormalBtn) callNormalBtn.addEventListener('click', () => callNextTicket('normal'));
@@ -653,8 +704,8 @@
         updateClientDisplay();
         updateHistory();
 
-        // ativa a primeira aba por padrão (admin)
-        showTab('admin');
+        // ativa a primeira aba por padrão (admin) - mas agora com login
+        // showTab('admin'); // Removido para forçar login
 
         // configura iframe do cliente
         try {
@@ -664,6 +715,11 @@
             clientVideo.setAttribute('controls', '');
             clientVideo.addEventListener('error', () => console.error('Erro ao carregar vídeo:', clientVideo.src));
         } catch (e) { /* ignore */ }
+
+        // Para cliente, tela cheia
+        if (currentRole === 'cliente') {
+            document.body.classList.add('cliente-fullscreen');
+        }
 
         console.log('Sistema iniciado com sucesso!');
     }
