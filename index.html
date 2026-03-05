@@ -294,16 +294,20 @@
             </div>
 
             <div id="cliente" class="tab-content">
-                <div id="senhaOverlay" class="fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center hidden z-40">
-                    <div id="overlaySenhaNumber" class="text-9xl font-bold text-yellow-400">---</div>
+                <div id="senhaOverlay" class="fixed inset-0 bg-black bg-opacity-95 flex flex-col items-center justify-center hidden z-40">
+                    <div class="text-center">
+                        <div class="text-6xl font-bold text-gray-400 mb-8">SENHA</div>
+                        <div id="overlaySenhaNumber" class="text-9xl font-bold text-yellow-400 mb-8">---</div>
+                        <div id="overlaySenhaType" class="text-5xl font-bold text-green-400">NORMAL</div>
+                    </div>
                 </div>
                 <div id="clientVideoContainer" class="relative w-full h-screen bg-gray-900">
                     <div class="video-container h-full">
                         <iframe id="clientVideo" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
-                    <div id="senhasRodape" class="fixed bottom-0 left-0 right-0 bg-black bg-opacity-80 text-white p-4 flex gap-4 justify-center items-center h-20">
-                        <span class="text-sm text-gray-400">Últimas Senhas:</span>
-                        <div id="clientLastThree" class="flex gap-3">
+                    <div id="senhasRodape" class="fixed bottom-0 left-0 right-0 bg-black bg-opacity-90 text-white p-4 flex gap-4 justify-center items-center h-24">
+                        <span class="text-lg font-bold text-gray-300">Últimas Senhas:</span>
+                        <div id="clientLastThree" class="flex gap-4">
                         </div>
                     </div>
                 </div>
@@ -368,6 +372,7 @@
 
     const senhaOverlay = document.getElementById('senhaOverlay');
     const overlaySenhaNumber = document.getElementById('overlaySenhaNumber');
+    const overlaySenhaType = document.getElementById('overlaySenhaType');
     const clientLastCalled = document.getElementById('clientLastCalled');
 
     let pendingTabId = null;
@@ -489,6 +494,8 @@
 
     function showSenhaOverlay(ticket) {
         overlaySenhaNumber.textContent = ticket.number;
+        overlaySenhaType.textContent = ticket.type === 'normal' ? 'NORMAL' : 'PREFERENCIAL';
+        overlaySenhaType.className = ticket.type === 'normal' ? 'text-5xl font-bold text-blue-400' : 'text-5xl font-bold text-green-400';
         senhaOverlay.classList.remove('hidden');
 
         // Zerar volume do vídeo
@@ -573,8 +580,9 @@
         const last = calledTickets.slice(-3).reverse();
         last.forEach(t => {
             const el = document.createElement('div');
-            el.className = t.type === 'normal' ? 'bg-blue-600 px-4 py-2 rounded text-center font-bold text-lg' : 'bg-green-600 px-4 py-2 rounded text-center font-bold text-lg';
-            el.textContent = t.number;
+            const typeLabel = t.type === 'normal' ? 'N' : 'P';
+            el.className = t.type === 'normal' ? 'bg-blue-600 px-6 py-3 rounded text-center font-bold text-2xl' : 'bg-green-600 px-6 py-3 rounded text-center font-bold text-2xl';
+            el.innerHTML = `<div class="text-2xl">${t.number}</div><div class="text-xs text-gray-200">${typeLabel}</div>`;
             clientLastThree.appendChild(el);
         });
     }
@@ -664,26 +672,80 @@
 
     // ---------- Impressão ----------
     function printTicket(ticket) {
-        const printWindow = window.open('', '_blank', 'width=400,height=400');
-        if (!printWindow || printWindow === window) {
-            console.warn('Print popup blocked or reused same window, skipping print');
-            return;
-        }
         const color = ticket.type === 'normal' ? '#4f46e5' : '#10b981';
         const typeText = ticket.type === 'normal' ? 'NORMAL' : 'PREFERENCIAL';
-        const htmlParts = [];
-        htmlParts.push('<html><head><title>Senha - ' + ticket.number + '</title>');
-        htmlParts.push('<style>body{font-family:Arial,sans-serif;text-align:center;padding:20px;} .ticket{border:2px solid ' + color + ';padding:30px;margin:20px;} .number{font-size:72px;font-weight:bold;color:' + color + ';}.type{font-size:28px;margin:15px 0;}.date{font-size:14px;color:#666;margin-top:20px;}</style>');
-        htmlParts.push('</head><body>');
-        htmlParts.push('<div class="ticket"><h1>Mobile Vision Senhas</h1>');
-        htmlParts.push('<div class="number">' + ticket.number + '</div>');
-        htmlParts.push('<div class="type">' + typeText + '</div>');
-        htmlParts.push('<div class="date">Emitido em: ' + (ticket.timestamp ? new Date(ticket.timestamp).toLocaleString('pt-BR') : '') + '</div>');
-        htmlParts.push('</div>');
-        htmlParts.push('<script>window.onload=function(){window.print();setTimeout(()=>window.close(),500);};</scr' + 'ipt>');
-        htmlParts.push('</body></html>');
-        printWindow.document.write(htmlParts.join(''));
-        printWindow.document.close();
+        const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Senha - ${ticket.number}</title>
+    <style>
+        * { margin: 0; padding: 0; }
+        body { 
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .ticket { 
+            border: 3px solid ${color};
+            padding: 40px;
+            margin: 20px auto;
+            background: white;
+            max-width: 400px;
+            border-radius: 10px;
+        }
+        .ticket h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .number { 
+            font-size: 96px;
+            font-weight: bold;
+            color: ${color};
+            line-height: 1;
+            margin: 20px 0;
+        }
+        .type { 
+            font-size: 32px;
+            font-weight: bold;
+            color: ${color};
+            margin: 20px 0;
+        }
+        .date { 
+            font-size: 14px;
+            color: #666;
+            margin-top: 30px;
+        }
+        @media print {
+            body { background: white; }
+            .ticket { border: 3px solid ${color}; margin: 0; padding: 30px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket">
+        <h1>Mobile Vision Senhas</h1>
+        <div class="number">${ticket.number}</div>
+        <div class="type">${typeText}</div>
+        <div class="date">Emitido em: ${ticket.timestamp ? new Date(ticket.timestamp).toLocaleString('pt-BR') : ''}</div>
+    </div>
+    <script>
+        window.print();
+        setTimeout(() => window.close(), 500);
+    <\/script>
+</body>
+</html>`;
+        
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const printWindow = window.open(url, '_blank', 'width=500,height=700');
+        if (printWindow) {
+            printWindow.focus();
+        } else {
+            alert('Não foi possível abrir a impressão. Verifique as configurações do navegador.');
+        }
     }
 
     // ---------- Persistência ----------
