@@ -30,17 +30,27 @@
             width: 100%;
             height: 100%;
         }
-        .cliente-fullscreen .video-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
+        .cliente-layout {
+            display: grid;
+            grid-template-columns: 7fr 3fr;
+            gap: 20px;
             height: 100vh;
-            z-index: 9999;
+            padding: 10px;
+            background: #000;
         }
-        .cliente-fullscreen .video-container iframe {
-            width: 100vw;
-            height: 100vh;
+        .cliente-video-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .cliente-senha-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-y: auto;
         }
         .senha-display {
             font-size: 3rem;
@@ -293,21 +303,22 @@
                 </div>
             </div>
 
-            <div id="cliente" class="tab-content">
-                <div id="senhaOverlay" class="fixed inset-0 bg-black bg-opacity-95 flex flex-col items-center justify-center hidden z-40">
-                    <div class="text-center">
-                        <div class="text-6xl font-bold text-gray-400 mb-8">SENHA</div>
-                        <div id="overlaySenhaNumber" class="text-9xl font-bold text-yellow-400 mb-8">---</div>
-                        <div id="overlaySenhaType" class="text-5xl font-bold text-green-400">NORMAL</div>
-                    </div>
-                </div>
-                <div id="clientVideoContainer" class="relative w-full h-screen bg-gray-900">
-                    <div class="video-container h-full">
+            <div id="cliente" class="tab-content cliente-layout">
+                <div class="cliente-video-section">
+                    <div class="video-container flex-grow">
                         <iframe id="clientVideo" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
-                    <div id="senhasRodape" class="fixed bottom-0 left-0 right-0 bg-black bg-opacity-90 text-white p-4 flex gap-4 justify-center items-center h-24">
-                        <span class="text-lg font-bold text-gray-300">Últimas Senhas:</span>
-                        <div id="clientLastThree" class="flex gap-4">
+                </div>
+                <div class="cliente-senha-section">
+                    <div class="text-center">
+                        <div class="text-lg font-bold text-gray-300 mb-3">SENHA ATUAL</div>
+                        <div id="overlaySenhaNumber" class="text-7xl font-bold text-yellow-400 mb-4">---</div>
+                        <div id="overlaySenhaType" class="text-2xl font-bold text-green-400 mb-4">NORMAL</div>
+                    </div>
+                    <hr class="border-gray-600 my-4">
+                    <div class="text-center">
+                        <div class="text-sm font-bold text-gray-300 mb-3">ÚLTIMAS SENHAS</div>
+                        <div id="clientLastThree" class="flex flex-col gap-2">
                         </div>
                     </div>
                 </div>
@@ -370,10 +381,8 @@
     const loginBtn = document.getElementById('loginBtn');
     const cancelLoginBtn = document.getElementById('cancelLoginBtn');
 
-    const senhaOverlay = document.getElementById('senhaOverlay');
     const overlaySenhaNumber = document.getElementById('overlaySenhaNumber');
     const overlaySenhaType = document.getElementById('overlaySenhaType');
-    const clientLastCalled = document.getElementById('clientLastCalled');
 
     let pendingTabId = null;
     let lastVideoUrl = videoUrl;
@@ -406,15 +415,13 @@
         const btn = document.querySelector(`.tab-button[data-tab="${tabId}"]`);
         if (btn) btn.classList.add('active');
 
-        // Para cliente, esconder outras abas e fullscreen
+        // Para cliente, esconder outras abas
         if (tabId === 'cliente') {
             tabButtons.forEach(b => {
                 if (b.getAttribute('data-tab') !== 'cliente') b.style.display = 'none';
             });
-            document.body.classList.add('cliente-fullscreen');
         } else {
             tabButtons.forEach(b => b.style.display = 'block');
-            document.body.classList.remove('cliente-fullscreen');
         }
 
         if (tabId === 'cliente') updateClientVideo();
@@ -495,12 +502,19 @@
     function showSenhaOverlay(ticket) {
         overlaySenhaNumber.textContent = ticket.number;
         overlaySenhaType.textContent = ticket.type === 'normal' ? 'NORMAL' : 'PREFERENCIAL';
-        overlaySenhaType.className = ticket.type === 'normal' ? 'text-5xl font-bold text-blue-400' : 'text-5xl font-bold text-green-400';
-        senhaOverlay.classList.remove('hidden');
+        overlaySenhaType.className = ticket.type === 'normal' ? 'text-2xl font-bold text-blue-400' : 'text-2xl font-bold text-green-400';
 
-        // Zerar volume do vídeo
-        try { clientVideo.volume = 0; } catch (e) {}
-        try { videoPreview.volume = 0; } catch (e) {}
+        // Animar o número da senha
+        const senhaElement = overlaySenhaNumber;
+        senhaElement.style.transform = 'scale(1)';
+        senhaElement.style.transition = 'none';
+        setTimeout(() => {
+            senhaElement.style.transition = 'all 0.5s ease';
+            senhaElement.style.transform = 'scale(1.1)';
+        }, 100);
+        setTimeout(() => {
+            senhaElement.style.transform = 'scale(1)';
+        }, 600);
 
         // Tocar som e falar
         playAudio(800, 300);
@@ -508,16 +522,8 @@
             speakTicket(ticket.number, ticket.type);
         }, 100);
 
-        // Mostrar overlay por 5 segundos
-        setTimeout(() => {
-            senhaOverlay.classList.add('hidden');
-            // Restaurar volume do vídeo
-            const v = Number(videoVolume.value || 50) / 100;
-            try { clientVideo.volume = v; } catch (e) {}
-            try { videoPreview.volume = v; } catch (e) {}
-            // Atualizar barra de senhas
-            updateClientLastThree();
-        }, 5000);
+        // Atualizar lista de últimas senhas
+        updateClientLastThree();
     }
 
     function callAgain() {
@@ -581,8 +587,8 @@
         last.forEach(t => {
             const el = document.createElement('div');
             const typeLabel = t.type === 'normal' ? 'N' : 'P';
-            el.className = t.type === 'normal' ? 'bg-blue-600 px-6 py-3 rounded text-center font-bold text-2xl' : 'bg-green-600 px-6 py-3 rounded text-center font-bold text-2xl';
-            el.innerHTML = `<div class="text-2xl">${t.number}</div><div class="text-xs text-gray-200">${typeLabel}</div>`;
+            el.className = t.type === 'normal' ? 'bg-blue-600 px-4 py-3 rounded text-center font-bold text-lg' : 'bg-green-600 px-4 py-3 rounded text-center font-bold text-lg';
+            el.innerHTML = `<div class="text-lg">${t.number}</div><div class="text-xs text-gray-200 mt-1">${typeLabel}</div>`;
             clientLastThree.appendChild(el);
         });
     }
@@ -671,6 +677,7 @@
     }
 
     // ---------- Impressão ----------
+    const printQueued = [];
     function printTicket(ticket) {
         const color = ticket.type === 'normal' ? '#4f46e5' : '#10b981';
         const typeText = ticket.type === 'normal' ? 'NORMAL' : 'PREFERENCIAL';
@@ -732,19 +739,30 @@
         <div class="date">Emitido em: ${ticket.timestamp ? new Date(ticket.timestamp).toLocaleString('pt-BR') : ''}</div>
     </div>
     <script>
-        window.print();
-        setTimeout(() => window.close(), 500);
+        window.onload = function() {
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => window.close(), 1000);
+            }, 500);
+        };
     <\/script>
 </body>
 </html>`;
         
-        const blob = new Blob([html], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const printWindow = window.open(url, '_blank', 'width=500,height=700');
-        if (printWindow) {
-            printWindow.focus();
-        } else {
-            alert('Não foi possível abrir a impressão. Verifique as configurações do navegador.');
+        try {
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const printWindow = window.open(url, '_blank', 'width=500,height=700');
+            if (printWindow) {
+                printWindow.focus();
+                console.log('Impressão aberta para:', ticket.number);
+            } else {
+                console.warn('Popup bloqueado, tentando alternativa...');
+                alert('⚠️ Popup bloqueado! Permitir popups para imprimir. Senha: ' + ticket.number);
+            }
+        } catch (e) {
+            console.error('Erro ao imprimir:', e);
+            alert('Erro ao abrir impressão: ' + e.message);
         }
     }
 
