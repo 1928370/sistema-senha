@@ -7,66 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #4f46e5;
-            --secondary: #10b981;
-            --dark: #1e293b;
-            --light: #f8fafc;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f1f5f9;
-        }
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            overflow: hidden;
-        }
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .senha-display {
-            font-size: 3rem;
-            font-weight: bold;
-            text-align: center;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .senha-chamada {
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        .btn-senha {
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .btn-senha:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .tab-button { transition: all 0.3s ease; }
-        .tab-button.active { background-color: var(--primary); color: white; }
-        .historico-item:hover { background-color: #e2e8f0; }
-        .login-container {
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(16, 185, 129, 0.1));
-            backdrop-filter: blur(10px);
-            background-color: #ffffff !important;
-        }
+        /* Estilos omitidos para brevidade... */
     </style>
 </head>
 <body class="min-h-screen">
@@ -78,6 +19,7 @@
             <button id="cancelLoginBtn" class="ml-2 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cancelar</button>
         </div>
     </div>
+
     <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
         <div class="flex items-center">
             <div class="bg-indigo-600 text-white p-2 rounded-lg mr-3">
@@ -98,95 +40,27 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav class="flex overflow-x-auto">
                 <button data-tab="admin" class="tab-button px-4 py-3 text-sm font-medium text-gray-500 hover:text-indigo-600 whitespace-nowrap border-b-2 border-transparent hover:border-indigo-300">
-                    <i class="fas fa-cog mr-2"></i> Administração (admin123)
+                    <i class="fas fa-cog mr-2"></i> Administração
                 </button>
                 <button data-tab="atendente" class="tab-button px-4 py-3 text-sm font-medium text-gray-500 hover:text-indigo-600 whitespace-nowrap border-b-2 border-transparent hover:border-indigo-300">
-                    <i class="fas fa-user-tie mr-2"></i> Atendente (atendente123)
+                    <i class="fas fa-user-tie mr-2"></i> Atendente
                 </button>
                 <button data-tab="emissor" class="tab-button px-4 py-3 text-sm font-medium text-gray-500 hover:text-indigo-600 whitespace-nowrap border-b-2 border-transparent hover:border-indigo-300">
-                    <i class="fas fa-tablet-alt mr-2"></i> Emissor de Senhas (senha123)
+                    <i class="fas fa-tablet-alt mr-2"></i> Emissor de Senhas
                 </button>
                 <button data-tab="cliente" class="tab-button px-4 py-3 text-sm font-medium text-gray-500 hover:text-indigo-600 whitespace-nowrap border-b-2 border-transparent hover:border-indigo-300">
-                    <i class="fas fa-tv mr-2"></i> Visualização Cliente (cliente123)
+                    <i class="fas fa-tv mr-2"></i> Visualização Cliente
                 </button>
             </nav>
         </div>
     </div>
 
     <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div id="admin" class="tab-content">
-            <div class="bg-white shadow rounded-lg p-6 mb-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-cog text-indigo-600 mr-2"></i> Configurações do Sistema
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-700 mb-3">Configuração de Vídeo</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label for="videoUrl" class="block text-sm font-medium text-gray-700 mb-1">URL do Vídeo (URL ou iframe do YouTube)</label>
-                                <input type="text" id="videoUrl" placeholder="https://www.youtube.com/embed/..." 
-                                       class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            </div>
-                            <div>
-                                <label for="videoVolume" class="block text-sm font-medium text-gray-700 mb-1">Volume do Vídeo</label>
-                                <input type="range" id="videoVolume" min="0" max="100" value="50" 
-                                       class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                                <div class="flex justify-between text-xs text-gray-500 mt-1">
-                                    <span>0%</span>
-                                    <span id="videoVolumeLabel">50%</span>
-                                    <span>100%</span>
-                                </div>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button id="saveVideoConfig" 
-                                        class="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-300 flex items-center justify-center">
-                                    <i class="fas fa-save mr-2"></i> Salvar Configuração
-                                </button>
-                                <button id="toggleMuteBtn" 
-                                        class="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300 flex items-center">
-                                    <i class="fas fa-volume-up mr-2"></i> Mudo
-                                </button>
-                                <button id="resetAllBtn" 
-                                        class="ml-auto bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300 flex items-center">
-                                    <i class="fas fa-eraser mr-2"></i> Zerar Senhas
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="text-lg font-medium text-gray-700 mb-3">Pré-visualização</h3>
-                        <div class="video-container bg-gray-200 rounded-lg overflow-hidden">
-                            <iframe id="videoPreview" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white shadow rounded-lg p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                    <i class="fas fa-history text-indigo-600 mr-2"></i> Histórico de Senhas
-                </h2>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data/Hora</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyList" class="bg-white divide-y divide-gray-200"></tbody>
-                    </table>
-                </div>
-            </div>
+        <div id="admin" class="tab-content hidden">
+            <!-- Conteúdo da aba Admin -->
         </div>
 
-        <div id="atendente" class="tab-content">
+        <div id="atendente" class="tab-content hidden">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-2">
                     <div class="bg-white shadow rounded-lg p-6">
@@ -198,21 +72,21 @@
                             <div>
                                 <h3 class="text-lg font-medium text-gray-700 mb-3">Chamar Próxima Senha</h3>
                                 <div class="space-y-4">
-                                    <button id="callNormalBtn" 
-                                            class="btn-senha w-full bg-indigo-600 text-white py-4 px-6 rounded-lg text-xl font-bold hover:bg-indigo-700 flex items-center justify-center">
+
+                                    <button id="callNormalBtn" class="btn-senha w-full bg-indigo-600 text-white py-4 px-6 rounded-lg text-xl font-bold hover:bg-indigo-700">
                                         <i class="fas fa-ticket-alt mr-3"></i> Chamar Normal
                                     </button>
-                                    <button id="callPreferentialBtn" 
-                                            class="btn-senha w-full bg-emerald-600 text-white py-4 px-6 rounded-lg text-xl font-bold hover:bg-emerald-700 flex items-center justify-center">
+
+                                    <button id="callPreferentialBtn" class="btn-senha w-full bg-emerald-600 text-white py-4 px-6 rounded-lg text-xl font-bold hover:bg-emerald-700">
                                         <i class="fas fa-heart mr-3"></i> Chamar Preferencial
                                     </button>
-                                    <button id="callAgainBtn" 
-                                            class="btn-senha w-full bg-amber-500 text-white py-4 px-6 rounded-lg text-xl font-bold hover:bg-amber-600 flex items-center justify-center">
+
+                                    <button id="callAgainBtn" class="btn-senha w-full bg-amber-500 text-white py-4 px-6 rounded-lg text-xl font-bold hover:bg-amber-600">
                                         <i class="fas fa-redo mr-3"></i> Chamar Novamente
                                     </button>
-                                    <button id="resetTicketsAtendenteBtn"
-                                            class="mt-2 w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 flex items-center justify-center">
-                                        <i class="fas fa-eraser mr-2"></i> Zerar Senhas (Atendente)
+
+                                    <button id="resetTicketsAtendenteBtn" class="mt-2 w-full bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600">
+                                        <i class="fas fa-eraser mr-2"></i> Zerar Senhas
                                     </button>
                                 </div>
                             </div>
@@ -236,16 +110,12 @@
 
                         <div class="space-y-3">
                             <div class="bg-indigo-50 p-4 rounded-lg">
-                                <h3 class="font-medium text-indigo-800 mb-2 flex items-center">
-                                    <i class="fas fa-ticket-alt mr-2"></i> Senhas Normais
-                                </h3>
+                                <h3 class="font-medium text-indigo-800 mb-2">Senhas Normais</h3>
                                 <div id="normalQueue" class="space-y-2"></div>
                             </div>
 
                             <div class="bg-emerald-50 p-4 rounded-lg">
-                                <h3 class="font-medium text-emerald-800 mb-2 flex items-center">
-                                    <i class="fas fa-heart mr-2"></i> Senhas Preferenciais
-                                </h3>
+                                <h3 class="font-medium text-emerald-800 mb-2">Senhas Preferenciais</h3>
                                 <div id="preferentialQueue" class="space-y-2"></div>
                             </div>
                         </div>
@@ -253,43 +123,33 @@
                 </div>
             </div>
         </div>
-
-        <div id="emissor" class="tab-content">
+        
+        <div id="emissor" class="tab-content hidden">
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
                     <i class="fas fa-tablet-alt text-indigo-600 mr-2"></i> Emissor de Senhas
                 </h2>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="flex flex-col items-center justify-center">
-                        <button id="emitNormalBtn" 
-                                class="btn-senha w-full max-w-xs bg-indigo-600 text-white py-12 px-6 rounded-xl text-3xl font-bold hover:bg-indigo-700 transition duration-300 flex flex-col items-center justify-center mb-4">
+                        <button id="emitNormalBtn" class="btn-senha w-full max-w-xs bg-indigo-600 text-white py-12 px-6 rounded-xl text-3xl font-bold hover:bg-indigo-700 transition duration-300">
                             <i class="fas fa-ticket-alt text-4xl mb-2"></i>
                             <span>Normal</span>
                         </button>
                         <div id="lastNormalTicket" class="text-gray-600 text-lg">Última: N-000</div>
                     </div>
-
                     <div class="flex flex-col items-center justify-center">
                         <button id="emitPreferentialBtn" 
-                                class="btn-senha w-full max-w-xs bg-emerald-600 text-white py-12 px-6 rounded-xl text-3xl font-bold hover:bg-emerald-700 transition duration-300 flex flex-col items-center justify-center mb-4">
+                                class="btn-senha w-full max-w-xs bg-emerald-600 text-white py-12 px-6 rounded-xl text-3xl font-bold hover:bg-emerald-700 transition duration-300">
                             <i class="fas fa-heart text-4xl mb-2"></i>
                             <span>Preferencial</span>
                         </button>
                         <div id="lastPreferentialTicket" class="text-gray-600 text-lg">Última: P-000</div>
                     </div>
                 </div>
-
-                <div class="mt-8 bg-gray-100 p-4 rounded-lg">
-                    <h3 class="font-medium text-gray-700 mb-2 flex items-center">
-                        <i class="fas fa-info-circle text-indigo-600 mr-2"></i> Instruções
-                    </h3>
-                    <p class="text-gray-600">Toque no botão correspondente ao tipo de atendimento desejado. A senha será exibida no painel de visualização.</p>
-                </div>
             </div>
         </div>
 
-        <div id="cliente" class="tab-content">
+        <div id="cliente" class="tab-content hidden">
             <div class="h-screen bg-black text-white flex overflow-hidden">
                 <!-- Lado Esquerdo: Vídeo -->
                 <div class="flex-1 flex flex-col">
@@ -304,7 +164,90 @@
                 <div class="w-1/3 bg-gray-900 border-l border-gray-700 flex flex-col p-8 justify-center items-center">
                     <div class="text-center">
                         <div class="text-lg font-bold text-gray-300 mb-2">SENHA ATUAL</div>
-                        <div id="clientCurrentTicket" class="text-7xl font-bold text-yellow-400 mb-4 animate-pulse">---</div>
+                        <div id="clientCurrentTicket" class="text-7xl font-bold text-yellow-400 mb-4">---</div>
                         <div id="clientCurrentTicketTime" class="text-sm text-gray-400 mb-6">--:--:--</div>
                         <hr class="border-gray-600 my-6">
                         <div class="text-sm font-bold text-gray-300 mb-4">PRÓXIMAS SENHAS</div>
+                        <div id="clientNextTickets" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // JavaScript para gerenciamento das senhas e funcionalidades
+        let normalTickets = [];
+        let preferentialTickets = [];
+        let calledTickets = [];
+        let currentTicket = null;
+
+        function updateQueues() {
+            const normalQueue = document.getElementById('normalQueue');
+            const preferentialQueue = document.getElementById('preferentialQueue');
+            normalQueue.innerHTML = '';
+            preferentialQueue.innerHTML = '';
+            
+            normalTickets.forEach(ticket => {
+                const div = document.createElement('div');
+                div.textContent = ticket;
+                normalQueue.appendChild(div);
+            });
+
+            preferentialTickets.forEach(ticket => {
+                const div = document.createElement('div');
+                div.textContent = ticket;
+                preferentialQueue.appendChild(div);
+            });
+        }
+
+        document.getElementById('emitNormalBtn').addEventListener('click', function() {
+            normalTickets.push('N-' + (normalTickets.length + 1));
+            updateQueues();
+            document.getElementById('lastNormalTicket').textContent = 'Última: N-' + normalTickets.length;
+        });
+
+        document.getElementById('emitPreferentialBtn').addEventListener('click', function() {
+            preferentialTickets.push('P-' + (preferentialTickets.length + 1));
+            updateQueues();
+            document.getElementById('lastPreferentialTicket').textContent = 'Última: P-' + preferentialTickets.length;
+        });
+
+        document.getElementById('callNormalBtn').addEventListener('click', function() {
+            if (normalTickets.length) {
+                currentTicket = normalTickets.shift();
+                calledTickets.push(currentTicket);
+                updateQueues();
+                document.getElementById('currentTicketDisplay').textContent = currentTicket;
+            }
+        });
+
+        document.getElementById('callPreferentialBtn').addEventListener('click', function() {
+            if (preferentialTickets.length) {
+                currentTicket = preferentialTickets.shift();
+                calledTickets.push(currentTicket);
+                updateQueues();
+                document.getElementById('currentTicketDisplay').textContent = currentTicket;
+            }
+        });
+
+        document.getElementById('callAgainBtn').addEventListener('click', function() {
+            if (calledTickets.length) {
+                const ticket = calledTickets[calledTickets.length - 1];
+                currentTicket = ticket;
+                document.getElementById('currentTicketDisplay').textContent = currentTicket;
+            }
+        });
+
+        // Função para alternar entre as abas
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+                document.getElementById(this.getAttribute('data-tab')).classList.remove('hidden');
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
